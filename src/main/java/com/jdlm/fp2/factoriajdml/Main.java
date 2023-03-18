@@ -1,19 +1,13 @@
 package com.jdlm.fp2.factoriajdml;
 
 import MapeoClases.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Query;
+import jakarta.persistence.*;
 import org.hibernate.HibernateException;
 
 import java.util.InputMismatchException;
-import java.util.Iterator;
 import java.util.Scanner;
 
 public class Main {
-
-
     static EntityManagerFactory emf = EmfSingleton.getInstance().getEmf();
     static EntityManager em = emf.createEntityManager();
 
@@ -33,16 +27,15 @@ public class Main {
 
     public static int menu() {
         int opcion = -1;
-        Scanner sc = new Scanner(System.in);
         try {
             System.out.println("1- Leer Datos");
             System.out.println("2- Insertar Datos");
             System.out.println("3- Modificar Datos");
             System.out.println("4- Eliminar Datos");
             System.out.println("0- Salir");
-            opcion = sc.nextInt();
+            opcion = Leer.pedirEntero("");
         } catch (InputMismatchException e) {
-            sc.next();
+            e.printStackTrace();
         }
 
         return opcion;
@@ -75,8 +68,8 @@ public class Main {
                     query = em.createQuery("Select p from ProyectosEntity p");
                     for (Object object : query.getResultList()) {
                         ProyectosEntity proyectos = (ProyectosEntity) object;
-                        System.out.println(proyectos.getProyectoId());
-                        System.out.println(proyectos.getTitulo());
+                        System.out.println("\n Id Proyecto" + proyectos.getProyectoId());
+                        System.out.println("\n Titulo Proyecto" + proyectos.getTitulo());
                         System.out.println("-------------------------------------------------");
                     }
                 }
@@ -84,8 +77,8 @@ public class Main {
                     query = em.createQuery("SELECT u from UsuarioEntity u");
                     for (Object object : query.getResultList()) {
                         UsuarioEntity usuario = (UsuarioEntity) object;
-                        System.out.println(usuario.getIdUsuario());
-                        System.out.println(usuario.getNombre());
+                        System.out.println("\n Id Usuario" + usuario.getIdUsuario());
+                        System.out.println("\n Nombre Usuario" + usuario.getNombre());
                         System.out.println("-------------------------------------------------");
                     }
                 }
@@ -116,6 +109,7 @@ public class Main {
                     centro.setNombre(Leer.pedirCadena("Introduce el nombre del centro"));
                     centro.setWeb(Leer.pedirCadena("Introduce la web del centro"));
                     centro.setContacto(Leer.pedirCadena("Introduce el nombre del contacto del centro"));
+                    centro.setActivo((byte) 1);
                     em.persist(centro);
                 }
                 case "proyectos" -> {
@@ -138,7 +132,51 @@ public class Main {
     }
 
     public static void modificarDatos() {
-
+        String tabla = Leer.pedirCadena("Introduce la tabla que deseas modificar: " +
+                "\nTablas: " +
+                "\n -Centros" +
+                "\n -Proyectos");
+        int id;
+        tabla = tabla.toLowerCase();
+        Query query;
+        try {
+            EntityTransaction transaction = em.getTransaction();
+            switch (tabla) {
+                case "centros" -> {
+                    CentrosEntity centro;
+                    int idNew;
+                    String nombre, web, contacto;
+                    id = Leer.pedirEntero("Introduce el id del centro");
+                    transaction.begin();
+                    query = em.createQuery("Select c from CentrosEntity c where c.id = " + id);
+                    centro = (CentrosEntity) query.getSingleResult();
+                    if (centro != null) {
+                        System.out.println("En caso de no quere modificar pulsar solo enter");
+                        idNew = Leer.pedirEntero("Introduce un nuevo id");
+                        nombre = Leer.pedirCadena("Introduce un nuevo nombre");
+                        web = Leer.pedirCadena("Introduce una nueva URL");
+                        contacto = Leer.pedirCadena("Introduce el nuevo contacto");
+                        if (!nombre.equals("")) {
+                            centro.setNombre(nombre);
+                        }
+                        if (idNew != 0) {
+                            centro.setIdCentro(idNew);
+                        }
+                        if (!web.equals("")) {
+                            centro.setWeb(web);
+                        }
+                        if (!contacto.equals("")) {
+                            centro.setContacto(contacto);
+                        }
+                    }
+                    transaction.commit();
+                }
+                case "proyectos" -> {
+                }
+            }
+        } catch (HibernateException | NoResultException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void eliminarDatos() {

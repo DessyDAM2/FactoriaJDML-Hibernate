@@ -1,4 +1,4 @@
-package com.jdml.fp2.factoriajdml2;
+package com.jdlm.fp2.factoriajdml;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
