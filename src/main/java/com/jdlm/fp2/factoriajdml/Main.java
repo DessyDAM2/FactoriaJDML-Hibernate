@@ -3,6 +3,7 @@ package com.jdlm.fp2.factoriajdml;
 import MapeoClases.*;
 import jakarta.persistence.*;
 import org.hibernate.HibernateException;
+import org.hibernate.Transaction;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -60,7 +61,7 @@ public class Main {
                     for (Object object : query.getResultList()) {
                         CentrosEntity centros = (CentrosEntity) object;
                         System.out.println("\nId centro: " + centros.getIdCentro());
-                        System.out.println("Nombre del centro" + centros.getNombre() + "\n");
+                        System.out.println("Nombre del centro: " + centros.getNombre() + "\n");
                         System.out.println("-------------------------------------------------");
                     }
                 }
@@ -68,8 +69,8 @@ public class Main {
                     query = em.createQuery("Select p from ProyectosEntity p");
                     for (Object object : query.getResultList()) {
                         ProyectosEntity proyectos = (ProyectosEntity) object;
-                        System.out.println("\n Id Proyecto" + proyectos.getProyectoId());
-                        System.out.println("\n Titulo Proyecto" + proyectos.getTitulo());
+                        System.out.println("\n Id Proyecto: " + proyectos.getProyectoId());
+                        System.out.println("\n Titulo Proyecto: " + proyectos.getTitulo());
                         System.out.println("-------------------------------------------------");
                     }
                 }
@@ -101,7 +102,6 @@ public class Main {
         try {
             EntityTransaction transaction = em.getTransaction();
             transaction.begin();
-            Query query;
             switch (tabla) {
                 case "centros" -> {
                     CentrosEntity centro = new CentrosEntity();
@@ -136,7 +136,6 @@ public class Main {
                 "\nTablas: " +
                 "\n -Centros" +
                 "\n -Proyectos");
-        int id;
         tabla = tabla.toLowerCase();
         Query query;
         try {
@@ -146,13 +145,13 @@ public class Main {
                     CentrosEntity centro;
                     int idNew;
                     String nombre, web, contacto;
-                    id = Leer.pedirEntero("Introduce el id del centro");
+                    int id = Leer.pedirEntero("Introduce el id del centro");
                     transaction.begin();
                     query = em.createQuery("Select c from CentrosEntity c where c.id = " + id);
-                    centro = (CentrosEntity) query.getSingleResult();
-                    if (centro != null) {
+                    if (query.getSingleResult() != null) {
+                        centro = (CentrosEntity) query.getSingleResult();
                         System.out.println("En caso de no quere modificar pulsar solo enter");
-                        idNew = Leer.pedirEntero("Introduce un nuevo id");
+                        idNew = Leer.pedirEntero("Introduce un nuevo id(si no desea modificar poner 0)");
                         nombre = Leer.pedirCadena("Introduce un nuevo nombre");
                         web = Leer.pedirCadena("Introduce una nueva URL");
                         contacto = Leer.pedirCadena("Introduce el nuevo contacto");
@@ -168,10 +167,44 @@ public class Main {
                         if (!contacto.equals("")) {
                             centro.setContacto(contacto);
                         }
-                    }
+                    } else System.out.println("Id no encontrado");
                     transaction.commit();
                 }
                 case "proyectos" -> {
+                    ProyectosEntity proyectos;
+                    int idNew, id = Leer.pedirEntero("1"), visitas;
+                    String titulo, descripcion, coordinador, estado, visibilidad;
+                    transaction.begin();
+                    query = em.createQuery("select p from ProyectosEntity p where p.id = " + id);
+                    if (query.getSingleResult() != null) {
+                        proyectos = (ProyectosEntity) query.getSingleResult();
+                        System.out.println("En caso de no quere modificar pulsar solo enter");
+                        idNew = Leer.pedirEntero("Introduce un nuevo id(si no desea modificar poner 0)");
+                        titulo = Leer.pedirCadena("Introduce un titulo nuevo");
+                        descripcion = Leer.pedirCadena("Introduce una descripción nueva");
+                        coordinador = Leer.pedirCadena("Introduce un nuevo coordinador");
+                        visibilidad = Leer.pedirCadena("Introduce la nueva visibilidad");
+                        visitas = Leer.pedirEntero("Introduce el número nuevo de visitas (si no desea modificar poner 0)");
+
+                        if (idNew != 0) {
+                            proyectos.setProyectoId(idNew);
+                        }
+                        if (!titulo.equals("")) {
+                            proyectos.setTitulo(titulo);
+                        }
+                        if (!descripcion.equals("")) {
+                            proyectos.setDescripcion(descripcion);
+                        }
+                        if (!coordinador.equals("")) {
+                            proyectos.setCoordinador(coordinador);
+                        }
+                        if (!visibilidad.equals("")) {
+                            proyectos.setVisibilidad(visibilidad);
+                        }
+                        if (visitas != 0) {
+                            proyectos.setVisitas(visitas);
+                        }
+                    } else System.out.println("Id no encontrado");
                 }
             }
         } catch (HibernateException | NoResultException e) {
