@@ -13,7 +13,6 @@ import java.util.regex.PatternSyntaxException;
  *
  */
 public class Leer {
-
     /**
      * Metodo para imprimir mensaje que se repetíra
      */
@@ -264,5 +263,4 @@ public class Leer {
         }
         return dato;
     }
-
 }

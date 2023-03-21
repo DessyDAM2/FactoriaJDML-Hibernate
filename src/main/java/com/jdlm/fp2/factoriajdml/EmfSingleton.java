@@ -5,7 +5,7 @@ import jakarta.persistence.Persistence;
 
 public class EmfSingleton {
     //instancia Singleton
-    private static EmfSingleton emfInstancia = new EmfSingleton();
+    private static final EmfSingleton emfInstancia = new EmfSingleton();
     //Nombre de la unidad de persistencia
     static private final String PERSISTANCE_UNIT_NAME = "default";
 

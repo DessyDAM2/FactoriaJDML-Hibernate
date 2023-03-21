@@ -9,6 +9,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
+    //Creamos un entity manager factory para
     static EntityManagerFactory emf = EmfSingleton.getInstance().getEmf();
     static EntityManager em = emf.createEntityManager();
 
@@ -43,7 +44,6 @@ public class Main {
     }
 
     public static void leerDatos() {
-
         String tabla = Leer.pedirCadena("Introduce la tabla para mostrar los datos" +
                 "\nTablas:" +
                 "\n -Centros" +
@@ -127,7 +127,7 @@ public class Main {
             }
             transaction.commit();
         } catch (HibernateException e) {
-            e.printStackTrace();
+            System.out.println();
         }
     }
 
@@ -172,7 +172,7 @@ public class Main {
                 }
                 case "proyectos" -> {
                     ProyectosEntity proyectos;
-                    int idNew, id = Leer.pedirEntero("1"), visitas;
+                    int idNew, id = Leer.pedirEntero("Introduce el id del proyecto"), visitas;
                     String titulo, descripcion, coordinador, estado, visibilidad;
                     transaction.begin();
                     query = em.createQuery("select p from ProyectosEntity p where p.id = " + id);
@@ -213,8 +213,42 @@ public class Main {
     }
 
     public static void eliminarDatos() {
-
+        String tabla = Leer.pedirCadena("Introduce la tabla que deseas modificar: " +
+                "\nTablas: " +
+                "\n -Centros" +
+                "\n -Proyectos");
+        tabla = tabla.toLowerCase();
+        switch (tabla) {
+            case "centros" -> {
+                try {
+                    EntityTransaction transaction = em.getTransaction();
+                    Query query;
+                    CentrosEntity centros;
+                    int id = Leer.pedirEntero("Introduce el id del centro");
+                    transaction.begin();
+                    query = em.createQuery("Select c from CentrosEntity c where c.id = " + id);
+                    centros = (CentrosEntity) query.getSingleResult();
+                    em.remove(centros);
+                    transaction.commit();
+                } catch (HibernateException | NoResultException e) {
+                    System.out.println("No existe el id de la tabla elegida");
+                }
+            }
+            case "proyectos" -> {
+                try {
+                    EntityTransaction transaction = em.getTransaction();
+                    Query query;
+                    ProyectosEntity proyectos;
+                    int id = Leer.pedirEntero("Introduce el id del centro");
+                    transaction.begin();
+                    query = em.createQuery("Select p from ProyectosEntity p where p.id = " + id);
+                    proyectos = (ProyectosEntity) query.getSingleResult();
+                    em.remove(proyectos);
+                    transaction.commit();
+                } catch (HibernateException | NoResultException e) {
+                    System.out.println("No existe el id de la tabla elegida");
+                }
+            }
+        }
     }
-
-
 }
