@@ -9,7 +9,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
-    //Creamos un entity manager factory para
+    //Creamos un entity manager factory para crear una sesion de hibernate
     static EntityManagerFactory emf = EmfSingleton.getInstance().getEmf();
     static EntityManager em = emf.createEntityManager();
 
@@ -18,15 +18,16 @@ public class Main {
         do {
             opcion = menu();
             switch (opcion) {
-                case 1 -> leerDatos();
-                case 2 -> insertarDatos();
-                case 3 -> modificarDatos();
-                case 4 -> eliminarDatos();
-                case 0 -> em.close();
+                case 1 -> leerDatos(); //Llamamos al metodo
+                case 2 -> insertarDatos(); //Llamamos al metodo
+                case 3 -> modificarDatos(); //Llamamos al metodo
+                case 4 -> eliminarDatos(); //Llamamos al metodo
+                case 0 -> em.close(); //Cerramos la sesion de hibernate
             }
         } while (opcion != 0);
     }
 
+    //Creamos un menú para mostrar las opciones y elegirlas
     public static int menu() {
         int opcion = -1;
         try {
@@ -43,18 +44,20 @@ public class Main {
         return opcion;
     }
 
+    //Metodo para mostrar los datos de las tablas
     public static void leerDatos() {
         String tabla = Leer.pedirCadena("Introduce la tabla para mostrar los datos" +
                 "\nTablas:" +
                 "\n -Centros" +
                 "\n -Proyectos" +
                 "\n -Usuarios");
-
         tabla = tabla.toLowerCase();
         try {
+            //Creamos la transaccion y la realizamos con una query
             EntityTransaction transaction = em.getTransaction();
             transaction.begin();
             Query query;
+            //Switch para elegir la tabla en la que queremos mostrar
             switch (tabla) {
                 case "centros" -> {
                     query = em.createQuery("Select c FROm CentrosEntity c");
@@ -102,9 +105,10 @@ public class Main {
         try {
             EntityTransaction transaction = em.getTransaction();
             transaction.begin();
+            //Switch para elegir la tabla en la que queremos insertar
             switch (tabla) {
                 case "centros" -> {
-                    CentrosEntity centro = new CentrosEntity();
+                    CentrosEntity centro = new CentrosEntity(); //Creamos un nuevo objeto de tipo
                     centro.setIdCentro(Leer.pedirEntero("Introduce el Id del centro"));
                     centro.setNombre(Leer.pedirCadena("Introduce el nombre del centro"));
                     centro.setWeb(Leer.pedirCadena("Introduce la web del centro"));
@@ -113,7 +117,7 @@ public class Main {
                     em.persist(centro);
                 }
                 case "proyectos" -> {
-                    ProyectosEntity proyectos = new ProyectosEntity();
+                    ProyectosEntity proyectos = new ProyectosEntity(); //Creamos un nuevo objeto de tipo
                     proyectos.setProyectoId(Leer.pedirEntero("Itroduce el Id del proyecto"));
                     proyectos.setTitulo(Leer.pedirCadena("Introduce el titulo del proyecto"));
                     proyectos.setDescripcion(Leer.pedirCadena("Introduce la descripción del proyecto"));
@@ -140,9 +144,10 @@ public class Main {
         Query query;
         try {
             EntityTransaction transaction = em.getTransaction();
+            //Switch para elegir la tabla en la que queremos modificar
             switch (tabla) {
                 case "centros" -> {
-                    CentrosEntity centro;
+                    CentrosEntity centro; //Creamos un nuevo objeto de tipo
                     int idNew;
                     String nombre, web, contacto;
                     int id = Leer.pedirEntero("Introduce el id del centro");
@@ -171,7 +176,7 @@ public class Main {
                     transaction.commit();
                 }
                 case "proyectos" -> {
-                    ProyectosEntity proyectos;
+                    ProyectosEntity proyectos; //Creamos un nuevo objeto de tipo
                     int idNew, id = Leer.pedirEntero("Introduce el id del proyecto"), visitas;
                     String titulo, descripcion, coordinador, estado, visibilidad;
                     transaction.begin();
@@ -220,15 +225,16 @@ public class Main {
         tabla = tabla.toLowerCase();
         switch (tabla) {
             case "centros" -> {
+                //Switch para elegir la tabla de la que queremos elimnar
                 try {
                     EntityTransaction transaction = em.getTransaction();
                     Query query;
-                    CentrosEntity centros;
+                    CentrosEntity centros; //Creamos un nuevo objeto de tipo
                     int id = Leer.pedirEntero("Introduce el id del centro");
                     transaction.begin();
                     query = em.createQuery("Select c from CentrosEntity c where c.id = " + id);
                     centros = (CentrosEntity) query.getSingleResult();
-                    em.remove(centros);
+                    em.remove(centros); //Eliminamos el objeto de la tabla
                     transaction.commit();
                 } catch (HibernateException | NoResultException e) {
                     System.out.println("No existe el id de la tabla elegida");
@@ -238,12 +244,12 @@ public class Main {
                 try {
                     EntityTransaction transaction = em.getTransaction();
                     Query query;
-                    ProyectosEntity proyectos;
+                    ProyectosEntity proyectos; //Creamos un nuevo objeto de tipo
                     int id = Leer.pedirEntero("Introduce el id del centro");
                     transaction.begin();
                     query = em.createQuery("Select p from ProyectosEntity p where p.id = " + id);
                     proyectos = (ProyectosEntity) query.getSingleResult();
-                    em.remove(proyectos);
+                    em.remove(proyectos); //Eliminamos el objeto de la tabla
                     transaction.commit();
                 } catch (HibernateException | NoResultException e) {
                     System.out.println("No existe el id de la tabla elegida");
